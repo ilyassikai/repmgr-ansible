@@ -1,0 +1,14 @@
+---
+- name: stop postgres
+  service: name=postgresql-10 state=stopped
+
+- name: implode PG_DATA
+  shell: rm -rf {{ repmgr_postgres_data }}/*
+
+- name: clone master
+  shell: sudo su - postgres -c '/usr/pgsql-10/bin/repmgr -h {{ repmg_ip_master }} -U {{ repmgr_postgres_user }} -d repmgr -f {{ repmgr_conf_dir }}/{{ repmgr_conf_file }} standby clone --verbose --force'
+
+- name: start postgres
+  service: name=postgresql-10 state=started
+
+

@@ -1,0 +1,36 @@
+# {{ansible_managed}}
+###################################################
+# Replication Manager configuration file
+###################################################
+
+# Cluster name
+node_name={{node_name}}
+
+# Node ID
+node_id={{repmgr_node_id}}
+
+# Connection information
+conninfo='host={{ repmg_ip_conn }} user={{repmgr_postgres_user}} dbname={{repmgr_postgres_dbname}}'
+rsync_options='{{ repmgr_rsync_options }}'
+
+data_directory='{{repmgr_postgres_data}}'
+monitoring_history=yes
+promote_check_timeout = 15
+
+promote_command='{{repmgr_promote_command}}'
+follow_command='{{repmgr_follow_command}}'
+log_file='{{repmgr_log_file}}'
+
+# Autofailover options
+failover={{repmgr_failover}}
+
+# Default: NOTICE
+logl_evel={{repmgr_loglevel}}
+
+# Logging facility: possible values are STDERR or - for Syslog integration - one of LOCAL0, LOCAL1, ..., LOCAL7, USER
+# Default: STDERR
+logf_acility={{repmgr_logfacility}}
+
+pg_bindir='{{repmgr_pg_bindir}}'
+
+# vim:filetype=dosini

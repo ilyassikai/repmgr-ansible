@@ -1,0 +1,55 @@
+---
+- name: install repmgr10
+  yum: 
+    name: "{{ item }}" 
+    state: present
+  with_items:
+  - repmgr10
+  #- postgresql-10-repmgr
+
+- name: create postgresql conf dir
+  file:
+    path: "{{ repmgr_postgresql_conf_dir }}"
+    state: directory
+    recurse: yes
+- name: update postgres settings
+  template:
+    src: postgresql.conf.j2
+    dest: "{{ repmgr_postgresql_conf_dir }}/{{ repmgr_postgresql_conf_file }}"
+  register: postgresql_conf
+
+- name: create repmgr conf dir
+  file:
+    path: "{{ repmgr_conf_dir }}"
+    state: directory
+    recurse: yes
+- name: create repmgr conf
+  template:
+    src: repmgr.conf.j2
+    dest: "{{ repmgr_conf_dir }}/{{ repmgr_conf_file }}"
+  register: repmgr_conf
+
+- name: restart postgres-10
+  service: name={{ repmgr_postgresql_service_name }} state=restarted
+  when: postgresql_conf.changed
+
+- name: register with repmgr
+  shell: "/usr/pgsql-10/bin/repmgr -f {{ repmgr_conf_dir }}/{{ repmgr_conf_file }} --verbose master register --force"
+  become: true
+  become_user: postgres
+  become_method: sudo
+  when: repmgr_conf.changed and repmgr_is_master|bool
+
+- name: stop postgres
+  hostname: "{{repmg_ip_standby}}" 
+  service: name=postgresql-10 state=stopped
+
+- name: implode PG_DATA
+  hostname: "{{repmg_ip_standby}}"
+  shell: rm -rf {{ repmgr_postgres_data }}/*
+
+- name: clone master
+  shell: sudo su - postgres -c '/usr/pgsql-10/bin/repmgr -h {{ repmg_ip_master }} -U {{ repmgr_postgres_user }} -d repmgr -f {{ repmgr_conf_dir }}/{{ repmgr_conf_file }} standby clone --verbose --force'
+
+- name: start postgres
+  service: name=postgresql-10 state=started
