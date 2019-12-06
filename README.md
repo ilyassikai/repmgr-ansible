@@ -1,0 +1,2 @@
+# repmgr-ansible
+Automatisation repmgr
