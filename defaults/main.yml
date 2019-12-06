@@ -1,0 +1,36 @@
+---
+repmgr_postgresql_service_name: postgresql-10
+repmgr_postgres_user: repmgr # User to connect with local
+repmg_ip_master: 192.168.56.101
+repmg_ip_standby: 192.168.56.102
+postgresql_repmgr_standby: "postgresql_replicas"
+# Defaults for PostgreSQL conf
+
+# Should be a file in include_dir directory of postgresql.conf
+repmgr_postgresql_conf_dir: /etc/postgresql/conf.d
+repmgr_postgresql_conf_file: repmgr_master-master.conf
+repmgr_postgresql_max_wal_senders: 10 # Should be > 0
+repmgr_postgresql_wal_keep_segments: 5000 # Should be >= 5000
+repmgr_postgresql_archive_command: 'true' # Dummy command that exits 0
+
+# Postgres user for standbys to connect with
+repmgr_postgresql_standby_user: repmgr_master
+repmgr_postgresql_standby_user_password: repmgr_master
+
+repmgr_conf_file: repmgr.conf
+repmgr_conf_dir: /etc/repmgr/10
+# repmgr options
+repmgr_node_id: 1
+repmgr_cluster: main
+repmgr_rsync_options: '--archive --checksum --compress --progress --rsh=ssh'
+repmgr_failover: automatic
+repmgr_loglevel: NOTICE
+repmgr_logfacility: STDERR
+repmgr_pg_bindir: /usr/pgsql-10/bin
+repmgr_postgres_dbname: repmgr
+repmgr_postgres_data: /var/lib/pgsql/10/data/
+repmgr_promote_command: '/usr/bin/repmgr standby promote -f /etc/repmgr/10/repmgr.conf --log-to-file'
+repmgr_follow_command: '/usr/bin/repmgr standby follow -f /etc/repmgr/10/repmgr.conf --log-to-file --upstream-node-id=%n'
+repmgr_log_file: '/var/log/postgresql/repmgrd.log'
+
+repmgr_is_master: false
